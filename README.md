@@ -1,0 +1,2 @@
+# AkkeyBot
+Akkey57492が開発するPythonどJavaScriptで書かれたBotです。
