@@ -1,0 +1,14 @@
+{
+	"token": "",
+	"start-notify": "false",
+	"chid": "",
+	"version": "",
+	"prefix": ".",
+
+	"description": {
+		"token": "BotへログインするためのToken",
+		"start-notify": "Botが起動したときに特定のチャンネルでお知らせするか",
+		"chid": "Botが起動したときにお知らせするチャンネルのID(start-notifyがfalseだった場合は無視されます)",
+		"version": "現在のBotバージョン"
+	}
+}
