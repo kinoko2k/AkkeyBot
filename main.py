@@ -5,8 +5,6 @@ import nest_asyncio
 print("[StartUp]ライブラリ「nest_asyncio」をインポートしました")
 import traceback
 print("[StartUp]ライブラリ「traceback」をインポートしました")
-import aioconsole
-print("[StartUp]ライブラリ「aioconsole」をインポートしました")
 import requests
 print("[StartUp]ライブラリ「requests」をインポートしました")
 import discord
@@ -232,7 +230,7 @@ async def on_command_error(_error, error):
 async def on_ready():
 	if ConfigLoad["start-notify"] == "true":
 		Start_up_message()
-		await bot.change_presence(activity=discord.Game(name='Development version', type=1))
+		await bot.change_presence(activity=discord.Game(name='ゲームのプレイ', type=1))
 		notify_channel_id = ConfigLoad["chid"]
 		notify_channel = await bot.fetch_channel(int(notify_channel_id))
 		version = ConfigLoad["version"]
@@ -240,13 +238,13 @@ async def on_ready():
 		await notify_channel.send(f"Bot version is {version}")
 	else:
 		Start_up_message()
-		await bot.change_presence(activity=discord.Game(name='Development version', type=1))
+		await bot.change_presence(activity=discord.Game(name='ゲームのプレイ', type=1))
 
 @bot.event
 async def on_guild_join(guild):
 	print(f"サーバー「{guild.name}」へ参加しました")
 	if guild.system_channel:
-		await guild.system_channel.send(f'AkkeyBotの導入誠にありがとうございます。\n「.help」で全てのコマンドを表示することができます。')
+		await guild.system_channel.send(f'参加時のメッセージ')
 	with open("mute.json", "r") as f:
 		mute_role_ids = json.load(f)
 	mute_role_ids[str(guild.id)] = "0"
