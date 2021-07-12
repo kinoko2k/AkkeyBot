@@ -5,6 +5,8 @@ import nest_asyncio
 print("[StartUp]ライブラリ「nest_asyncio」をインポートしました")
 import traceback
 print("[StartUp]ライブラリ「traceback」をインポートしました")
+import aioconsole
+print("[StartUp]ライブラリ「aioconsole」をインポートしました")
 import requests
 print("[StartUp]ライブラリ「requests」をインポートしました")
 import discord
@@ -15,8 +17,12 @@ import json
 print("[StartUp]ライブラリ「json」をインポートしました")
 import re
 print("[StartUp]ライブラリ「re」をインポートしました")
+import io
+print("[StartUp]ライブラリ「io」をインポートしました")
 from discord.ext import commands
 print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
+from contextlib import redirect_stdout
+print("[StartUp]ライブラリ「contextlib」のパッケージ「redirect_stdout」をインポートしました")
 from discord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandNotFound」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandOnCooldown」をインポートしました")
@@ -158,6 +164,13 @@ def invite_check(code): # invitecコマンドで使用
 	response = res.json()
 	return response
 print("[StartUp]関数「invite_check」をロードしました")
+
+def words_check(data, gid): # NGWordコマンドで使用
+	for json_gid in data:
+		if str(gid) == json_gid:
+			return True
+	return False
+print("[StartUp]関数「words_check」をロードしました")
 # Function
 
 # Config load
@@ -168,7 +181,7 @@ print("[StartUp]Jsonファイル「config.json」をロードしました")
 
 # Settings
 prefix = ConfigLoad["prefix"]
-owners = [47329, 29474]
+owners = [38476, 39992]
 bot = commands.Bot(
 	command_prefix=(get_prefix),
 	help_command=None,
@@ -214,6 +227,7 @@ async def on_command_error(_error, error):
 	raise error
 # Error処理
 
+# Bot Events
 @bot.event
 async def on_ready():
 	if ConfigLoad["start-notify"] == "true":
@@ -226,13 +240,13 @@ async def on_ready():
 		await notify_channel.send(f"Bot version is {version}")
 	else:
 		Start_up_message()
-		await bot.change_presence(activity=discord.Game(name='Botステータス', type=1))
+		await bot.change_presence(activity=discord.Game(name='Development version', type=1))
 
 @bot.event
 async def on_guild_join(guild):
 	print(f"サーバー「{guild.name}」へ参加しました")
 	if guild.system_channel:
-		await guild.system_channel.send(f'サーバー参加時のメッセージ')
+		await guild.system_channel.send(f'AkkeyBotの導入誠にありがとうございます。\n「.help」で全てのコマンドを表示することができます。')
 	with open("mute.json", "r") as f:
 		mute_role_ids = json.load(f)
 	mute_role_ids[str(guild.id)] = "0"
@@ -243,6 +257,11 @@ async def on_guild_join(guild):
 	guilds_prefix[str(guild.id)] = "."
 	with open("prefix.json", "w") as f:
 		json.dump(guilds_prefix, f, indent=4)
+	with open("words.json", "r") as f:
+		words_load = json.load(f)
+	words_load[str(guild.id)] = []
+	with open("words.json", "w") as f:
+		json.dump(words_load, f, indent=4)
 
 @bot.event
 async def on_guild_remove(guild):
@@ -257,6 +276,12 @@ async def on_guild_remove(guild):
 	prefixes.pop(str(guild.id))
 	with open("prefix.json", "w") as f:
 		json.dump(prefixes, f, indent=4)
+	with open("words.json", "r") as f:
+		words_load = json.load(f)
+	words_load.pop(str(guild.id))
+	with open("words.json", "w") as f:
+		json.dump(words_load, f, indent=4)
+# Bot Events
 
 @bot.command()
 async def help(help, t="cmd", page="0"):
@@ -266,45 +291,42 @@ async def help(help, t="cmd", page="0"):
 		elif page == "1":
 			HelpPage1 = discord.Embed(title="コマンド一覧 - 1")
 			HelpPage1.add_field(name="update", value="これまでアップデート履歴と変更ログを見ることができます。", inline=False)
-			HelpPage1.add_field(name="say [type(msg or embed / str)] [message(str)]", value="Botに言葉をしゃべらせることができます。", inline=False)
-			HelpPage1.add_field(name="roleper [@MentionRole(str)]", value="メンションしたロールの権限を見ることができます。", inline=False)
-			HelpPage1.add_field(name="memberper [@Mention(str)]", value="メンションしたユーザーの権限を見ることができます。", inline=False)
-			HelpPage1.add_field(name="getmcsv [Minecraftサーバーのアドレス(str)] [Minecraftサーバーのポート(str)]", value="指定したサーバーの参加人数やpingを取得します。", inline=False)
+			HelpPage1.add_field(name="say [type(msg/ embed)] [message]", value="Botに言葉をしゃべらせることができます。", inline=False)
+			HelpPage1.add_field(name="roleper [@MentionRole]", value="メンションしたロールの権限を見ることができます。", inline=False)
+			HelpPage1.add_field(name="memberper [@Mention]", value="メンションしたユーザーの権限を見ることができます。", inline=False)
+			HelpPage1.add_field(name="getmcsv [Minecraftサーバーのアドレス] [Minecraftサーバーのポート]", value="指定したサーバーの参加人数やpingを取得します。", inline=False)
 			await help.send(embed=HelpPage1)
 		elif page == "2":
 			HelpPage2 = discord.Embed(title="コマンド一覧 - 2")
 			HelpPage2.add_field(name="getmojang", value="Mojangサーバーのステータスを表示します。", inline=False)
-			HelpPage2.add_field(name="serach [UserID(int)]", value="IDのユーザーの情報を取得します。", inline=False)
+			HelpPage2.add_field(name="serach [UserID]", value="IDのユーザーの情報を取得します。", inline=False)
 			HelpPage2.add_field(name="banlist", value="サーバーからBanされているユーザーを一覧します。", inline=False)
-			HelpPage2.add_field(name="kick [@Mentioin(str)] [Reason(str)]", value="ユーザーのKickを実行します。", inline=False)
-			HelpPage2.add_field(name="tempban [UserID(int)] [Time(単位: 秒 / int)] [Reason(str)]", value="一時的なBanです。", inline=False)
+			HelpPage2.add_field(name="kick [@Mentioin] [Reason]", value="ユーザーのKickを実行します。", inline=False)
+			HelpPage2.add_field(name="tempban [UserID] [Time(単位: 秒)] [Reason]", value="一時的なBanです。", inline=False)
 			await help.send(embed=HelpPage2)
 		elif page == "3":
 			HelpPage3 = discord.Embed(title="コマンド一覧 - 3")
 			HelpPage3.add_field(name="ban [UserID] [Reason]", value="プレイヤーをBanします", inline=False)
-			HelpPage3.add_field(name="unban [UserID(int)]", value="指定のユーザーをUnBanします。", inline=False)
-			HelpPage3.add_field(name="report [Content(str)]", value="不具合等の報告ができます。")
-			HelpPage3.add_field(name="sapi [APIURL(str)] [Header(Json / str)]", value="簡単にAPIのテストを行うことができます。", inline=False)
-			HelpPage3.add_field(name="slowmode [delay(int)]", value="簡単にそのチャンネルの低速モードを設定できます。", inline=False)
+			HelpPage3.add_field(name="unban [UserID]", value="指定のユーザーをUnBanします。", inline=False)
+			HelpPage3.add_field(name="report [Content]", value="不具合等の報告ができます。")
+			HelpPage3.add_field(name="sapi [APIURL] [Headers(Json)]", value="簡単にAPIのテストを行うことができます。", inline=False)
+			HelpPage3.add_field(name="slowmode [delay(seconds / max: 6hours)]", value="簡単にそのチャンネルの低速モードを設定できます。", inline=False)
 			await help.send(embed=HelpPage3)
 		elif page == "4":
 			HelpPage4 = discord.Embed(title="コマンド一覧 - 4")
-			HelpPage4.add_field(name="lookup [IP(int)]", value="IPの情報をAPIで検索します。")
-			HelpPage4.add_field(name="gban [UserID(int)]", value="Botの入っている全てのサーバーでBan")
-			HelpPage4.add_field(name="gunban [UserID(int)]", value="Botの入っている全てのサーバーでUnBan")
-			HelpPage4.add_field(name="mute [type(str)] [id(int)]", value="ユーザーのミュートとアンミュートを行います")
-			HelpPage4.add_field(name="stop", value="Botを停止")
+			HelpPage4.add_field(name="lookup [IP]", value="IPの情報をAPIで検索します。")
+			HelpPage4.add_field(name="mute [type(set / mute)] [id]", value="ユーザーのミュートとアンミュートを行います")
+			HelpPage4.add_field(name="qi [@Mention]", value="特定のBotの招待リンクを発行します。")
+			HelpPage4.add_field(name="nitroc [nitro-code]", value="Nitroのリンクが有効か確認します。")
+			HelpPage4.add_field(name="invitec [invite-link-code]", value="招待リンクが機能しているか確認します。")
 			await help.send(embed=HelpPage4)
 		elif page == "5":
 			HelpPage5 = discord.Embed(title="コマンド一覧 - 5")
-			HelpPage5.add_field(name="tokenec [token(str)]", value="Tokenが有効か確認します。")
-			HelpPage5.add_field(name="tokenc [token(str)]", value="Tokenの情報を詳細に確認します。")
-			HelpPage5.add_field(name="qi [@Mention(str)]", value="特定のBotの招待リンクを発行します。")
-			HelpPage5.add_field(name="nitroc [nitro-code(str)]", value="Nitroのリンクが有効か確認します。")
-			HelpPage5.add_field(name="invitec [invite-link-code(str)]", value="招待リンクが機能しているか確認します。")
-		elif page == "6":
-			HelpPage6 = discord.Embed(title="コマンド一覧 - 6")
-			HelpPage6.add_field(name="ping [type(str)]", value="Botのpingを測定します。")
+			HelpPage5.add_field(name="tokenec [token]", value="Tokenが有効か確認します。")
+			HelpPage5.add_field(name="tokenc [token]", value="Tokenの情報を詳細に確認します。")
+			HelpPage5.add_field(name="ping [type(normal / float)]", value="Botのpingを測定します。")
+			HelpPage5.add_field(name="glist", value="Botの参加しているサーバー一覧です。")
+			HelpPage5.add_field(name="ngword [type(add / remove / words)] [words]", value="NGWordの設定です")
 		else:
 			await help.send("無効な引数です。")
 	else:
@@ -341,8 +363,89 @@ async def update(update):
 	UpdateInfo.add_field(name="Bot-PreRerese-Development-#24(Development)", value="- nitrocコマンドを追加\n- invitecコマンドを追加", inline=False)
 	UpdateInfo.add_field(name="Bot-PreRerese-Development-#25(Development)", value="- redeemコマンドを追加\n- Plus機能を追加", inline=False)
 	UpdateInfo.add_field(name="Bot-PreRerese-Development-#26(Development | Latest)", value="- 複数の不具合を修正", inline=False)
-	UpdateInfo.add_field(name="Bot-Version-1.0.0(Latest)", value="- 複数の不具合を修正\n- Botコマンドを追加\n- plus機能やそれに関することを完全削除\n- pingコマンド追加", inline=False)
+	UpdateInfo.add_field(name="Bot-Version-1.0.0", value="- 複数の不具合を修正\n- Botコマンドを追加\n- plus機能やそれに関することを完全削除\n- pingコマンド追加", inline=False)
+	UpdateInfo.add_field(name="Bot-Version-1.0.1(Latest)", value="- glist追加\n- runコマンドを追加\n- 一部のユーザーしか実行できないコードはhelpから削除\n- サーバーごとにNGWordを追加できるように\n- helpコマンドの表示変更", inline=False)
 	await update.send(embed=UpdateInfo)
+
+@bot.command()
+async def ngword(ngword, t, word: str=None):
+	guild_id = ngword.guild.id
+	with open("words.json", "r", encoding="utf-8") as f:
+		words_load = json.load(f)
+	if t == "add":
+		if word == None:
+			await ngword.send("引数が足りません。")
+		response = words_check(data=words_load, gid=guild_id)
+		if response == True:
+			pass
+		else:
+			await ngword.send("想定外のエラーです。\nBotを参加させなおしても改善しない場合は開発者にお問い合わせください。")
+			return
+		for w in words_load[str(guild_id)]:
+			if w == word:
+				await ngword.send("既にその文字は登録されています。")
+				return
+			else:
+				pass
+		words_load[str(guild_id)].append(word)
+		with open("words.json", "w", encoding="utf-8") as f:
+			json.dump(words_load, f, indent=4)
+		await ngword.send("NGWordの登録が完了しました。")
+	elif t == "remove":
+		if word == None:
+			await ngword.send("引数が足りません。")
+		response = words_check(data=words_load, gid=guild_id)
+		if response == True:
+			pass
+		else:
+			await ngword.send("想定外のエラーです。\nBotを参加させなおしても改善しない場合は開発者にお問い合わせください。")
+			return
+		for w in words_load[str(guild_id)]:
+			if w == word:
+				words_load[str(guild_id)].remove(word)
+				with open("words.json", "w", encoding="utf-8") as f:
+					json.dump(words_load, f, indent=4)
+				await ngword.send("NGWordの削除が完了しました。")
+				return
+			else:
+				pass
+		await ngword.send("NGWordが存在しません。")
+	elif t == "words":
+		response = words_check(data=words_load, gid=guild_id)
+		if response == True:
+			pass
+		else:
+			await ngword.send("想定外のエラーです。\nBotを参加させなおしても改善しない場合は開発者にお問い合わせください。")
+			return
+		words = []
+		for w in words_load[str(guild_id)]:
+			words.append(w)
+		await ngword.send("- {0}".format("\n".join(words)))
+			
+@bot.command()
+@commands.is_owner()
+async def run(run, *, c):
+	code = c
+	code = code.replace('```', '').replace('py', '')
+	try:
+		f = io.StringIO()
+		with redirect_stdout(f):
+			exec(
+				f'async def __ex(m): ' + ''.join(f'\n {l}' for l in code.split('\n'))
+			)
+			await locals()['__ex'](code)
+			r = f.getvalue()
+			await run.send(f'```powershell\n{r}```' or '実行は正常に完了しました。')
+	except Exception as e:
+		t = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+		await run.send(f'```powershell\n{t}\n```')
+
+@bot.command()
+@commands.cooldown(1, 30, commands.BucketType.user)
+async def glist(glist):
+	guilds = bot.guilds
+	guild_list = ["• {0}".format(guild) for guild in guilds]
+	await glist.send("Guilds\n{0}".format("\n".join(guild_list)))
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
@@ -1096,7 +1199,7 @@ async def slowmode(slowmode, delay: int):
 async def report(report, *, content):
 	print("[Run]コマンド「report」が実行されました")
 	await report.send("レポートを送信します。")
-	get_user = await bot.fetch_user(37382)
+	get_user = await bot.fetch_user(38294)
 	await get_user.send(f"レポートが届きました。\n送信元: {report.author}\n内容: {content}")
 	await report.send("レポートが送信されました。")
 
@@ -1123,4 +1226,4 @@ async def stop(stop):
 
 bot.run(ConfigLoad["token"])
 
-# Copyright 2021 Akkey57492
+# Copyright 2021 - 2021 Akkey57492
