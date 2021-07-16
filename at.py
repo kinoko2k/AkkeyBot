@@ -19,6 +19,10 @@ ConfigOpen = open("config.json", "r",  encoding="utf-8")
 ConfigLoad = json.load(ConfigOpen)
 
 @client.event
+async def on_ready():
+	print("Logged In")
+
+@client.event
 async def on_message(message):
 	if message.author.bot:
 		return
