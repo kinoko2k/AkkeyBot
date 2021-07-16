@@ -1085,20 +1085,73 @@ async def clear(clear, amout="10"):
 	
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
-async def serach(serach, id:int=None):
+async def serach(serach, u=None):
 	print("[Run]コマンド「serach」が実行されました")
-	if id == None:
+	a = u.replace("<", "")
+	b = a.replace("@", "")
+	c = b.replace("!", "")
+	d = c.replace(">", "")
+	e = d.replace("&", "")
+	if e == None:
 		await serach.send("引数が無効です。")
 		return
+	if e == "me":
+		e = serach.author.id
 	try:
-		user = await bot.fetch_user(id)
-	except discord.errors.NotFound:
-		UserFoundError = discord.Embed(title="存在しないユーザー", description="IDを検索しましたがユーザーが見つかりませんでした。\nIDが間違っているかDiscordの問題かバグです。")
-		await serach.send(embed=UserFoundError)
+		def status_jp_gen(s):
+			if "online" in s:
+				status_jp = "オンライン"
+			elif "idle" in s:
+				status_jp = "離席中"
+			elif "dnd" in s:
+				status_jp = "離席中"
+			elif "offline" in s:
+				status_jp = "オフライン"
+			return status_jp
+		guild = bot.get_guild(serach.guild.id)
+		user = guild.get_member(int(e))
+		name = user.name
+		tag = user.discriminator
+		username = f"{name}#{tag}"
+		id = user.id
+		status = user.status
+		status_phone = user.mobile_status
+		status_app = user.desktop_status
+		status_web = user.web_status
+		nickname = user.display_name
+		create_time = user.created_at
+		join_time = user.joined_at
+		bot_check = user.bot
+		if bot_check == True:
+			bot_check_jp = "Bot"
+		if bot_check == False:
+			bot_check_jp = "User"
+		status_jp = status_jp_gen(s=status)
+		phone_status_jp = status_jp_gen(s=status_phone)
+		desktop_status_jp = status_jp_gen(s=status_app)
+		web_status_jp = status_jp_gen(s=status_web)
+		uinfo = discord.Embed(title=f"{username}", description=f"ユーザー名: {username}\nID: {id}\nニックネーム: {nickname}\nアカウント作成日: {create_time}\nサーバー参加日: {join_time}\nステータス: {status_jp}\nWebステータス: {web_status_jp}\nデスクトップステータス: {desktop_status_jp}\nスマホステータス: {phone_status_jp}\nBotステータス: {bot_check_jp}")
+		uinfo.set_thumbnail(url=f"{user.avatar_url}")
+		await serach.send(embed=uinfo)
 		return
-	SerachUser = discord.Embed(title=f"{user}", description=f"ユーザー名: {user}\nID: {user.id}\nアカウント作成日: {user.created_at}")
-	SerachUser.set_thumbnail(url=f"{user.avatar_url}")
-	await serach.send(embed=SerachUser)
+	except discord.errors.NotFound:
+		try:
+			user = await bot.fetch_user(int(e))
+			name = user.name
+			tag = user.discriminator
+			username = f"{name}#{tag}"
+			id = user.id
+			create_time = user.created_at
+			bot_check = user.bot
+			if bot_check == True:
+				bot_check_jp = "Bot"
+			elif bot_check == False:
+				bot_check_jp = "User"
+			uinfo = discord.Embed(title=f"{username}", description=f"ユーザー名: {username}\nID: {id}\nアカウント作成日: {create_time}\nBotステータス: {bot_check_jp}")
+			uinfo.set_thumbnail(url=f"{user.avatar_url}")
+			await serach.send(embed=uinfo)
+		except:
+			await serach.send("エラーが発生しました。\nユーザーを見つけることができませんでした。")
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
