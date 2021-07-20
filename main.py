@@ -3,7 +3,7 @@
 # Module import
 import nest_asyncio
 print("[StartUp]ライブラリ「nest_asyncio」をインポートしました")
-import traceback
+import traceback2 as traceback
 print("[StartUp]ライブラリ「traceback」をインポートしました")
 import requests
 print("[StartUp]ライブラリ「requests」をインポートしました")
@@ -13,13 +13,11 @@ import asyncio
 print("[StartUp]ライブラリ「asyncio」をインポートしました")
 import json
 print("[StartUp]ライブラリ「json」をインポートしました")
-import re
-print("[StartUp]ライブラリ「re」をインポートしました")
 import io
 print("[StartUp]ライブラリ「io」をインポートしました")
 from discord.ext import commands
 print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
-from contextlib import redirect_stdout
+from contextlib3 import redirect_stdout
 print("[StartUp]ライブラリ「contextlib」のパッケージ「redirect_stdout」をインポートしました")
 from discord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandNotFound」をインポートしました")
