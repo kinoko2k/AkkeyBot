@@ -3,5 +3,4 @@ traceback2
 requests
 discord
 asyncio
-re
 contextlib
