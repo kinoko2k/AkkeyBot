@@ -1251,6 +1251,9 @@ async def stop(stop):
 	await bot.logout()
 	await bot.close()
 
-bot.run(ConfigLoad["token"])
+try:
+	bot.run(ConfigLoad["token"])
+except:
+	exit()
 
 # Copyright 2021 - 2021 Akkey57492
