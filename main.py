@@ -13,8 +13,6 @@ import asyncio
 print("[StartUp]ライブラリ「asyncio」をインポートしました")
 import json
 print("[StartUp]ライブラリ「json」をインポートしました")
-import io
-print("[StartUp]ライブラリ「io」をインポートしました")
 from discord.ext import commands
 print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
 from contextlib3 import redirect_stdout
@@ -424,7 +422,7 @@ async def run(run, *, c):
 	code = c
 	code = code.replace('```', '').replace('py', '')
 	try:
-		f = io.StringIO()
+		f = ""
 		with redirect_stdout(f):
 			exec(
 				f'async def __ex(m): ' + ''.join(f'\n {l}' for l in code.split('\n'))
