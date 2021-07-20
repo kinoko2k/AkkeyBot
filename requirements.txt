@@ -1,0 +1,7 @@
+nest_asyncio
+traceback
+requests
+discord
+asyncio
+re
+contextlib
