@@ -15,8 +15,6 @@ import json
 print("[StartUp]ライブラリ「json」をインポートしました")
 from discord.ext import commands
 print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
-from contextlib3 import redirect_stdout
-print("[StartUp]ライブラリ「contextlib」のパッケージ「redirect_stdout」をインポートしました")
 from discord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandNotFound」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandOnCooldown」をインポートしました")
@@ -415,24 +413,6 @@ async def ngword(ngword, t, word: str=None):
 		for w in words_load[str(guild_id)]:
 			words.append(w)
 		await ngword.send("- {0}".format("\n".join(words)))
-			
-@bot.command()
-@commands.is_owner()
-async def run(run, *, c):
-	code = c
-	code = code.replace('```', '').replace('py', '')
-	try:
-		f = ""
-		with redirect_stdout(f):
-			exec(
-				f'async def __ex(m): ' + ''.join(f'\n {l}' for l in code.split('\n'))
-			)
-			await locals()['__ex'](code)
-			r = f.getvalue()
-			await run.send(f'```powershell\n{r}```' or '実行は正常に完了しました。')
-	except Exception as e:
-		t = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
-		await run.send(f'```powershell\n{t}\n```')
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
