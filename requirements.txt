@@ -1,5 +1,5 @@
 nest_asyncio
-traceback
+traceback2
 requests
 discord
 asyncio
