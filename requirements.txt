@@ -3,4 +3,3 @@ traceback2
 requests
 discord
 asyncio
-contextlib3
