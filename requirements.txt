@@ -3,4 +3,4 @@ traceback2
 requests
 discord
 asyncio
-dotenv
+python-dotenv
