@@ -11,7 +11,7 @@ import discord
 print("[StartUp]ライブラリ「discord」をインポートしました")
 import asyncio
 print("[StartUp]ライブラリ「asyncio」をインポートしました")
-import json5 as json
+import json
 print("[StartUp]ライブラリ「json」をインポートしました")
 from discord.ext import commands
 print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
