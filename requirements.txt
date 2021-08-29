@@ -1,6 +1,9 @@
+re
+json
 nest_asyncio
+datetime
 traceback2
 requests
 discord
 asyncio
-python-dotenv
+json
