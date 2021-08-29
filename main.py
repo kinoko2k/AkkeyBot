@@ -1,10 +1,16 @@
 # coding: utf-8
 
 # Module import
+import re
+print("[StartUp]ライブラリ「re」をインポートしました")
+from json.decoder import JSONDecodeError
+print("[StartUp]ライブラリ「json」のパッケージ「decoder」に含まれている「JsonDecodeError」をインポートしました")
 import nest_asyncio
 print("[StartUp]ライブラリ「nest_asyncio」をインポートしました")
+import datetime
+print("[StartUp]ライブラリ「datetime」をインポートしました")
 import traceback2 as traceback
-print("[StartUp]ライブラリ「traceback」をインポートしました")
+print("[StartUp]ライブラリ「traceback2」をインポートしました")
 import requests
 print("[StartUp]ライブラリ「requests」をインポートしました")
 import discord
@@ -15,13 +21,14 @@ import json
 print("[StartUp]ライブラリ「json」をインポートしました")
 from discord.ext import commands
 print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
-from discord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument
+from discord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument, MissingPermissions
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandNotFound」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「CommandOnCooldown」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「NotOwner」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「MemberNotFound」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「RoleNotFound」をインポートしました")
 print("[StartUp]ライブラリ「discord」のパッケージ「MissingRequiredArgument」をインポートしました")
+print("[StartUP]ライブラリ「discord」のパッケージ「MissingPermissions」をインポートしました")
 # Module import
 
 # RuntimeError防止
@@ -30,13 +37,6 @@ print("[StartUp]nest_asyncioを適応しました")
 # RuntimeError防止
 
 # 関数
-def get_all_guilds(): # gban関連に使用
-	guilds = []
-	for guild in bot.guilds:
-		guilds.append(guild.id)
-	return guilds
-print("[StartUp]関数「get_all_guilds」をロードしました")
-
 def get_mute_role(gid): # mute関連に使用
 	with open("mute.json", "r") as f:
 		mute_role_ids = json.load(f)
@@ -88,6 +88,7 @@ print("[StartUp]関数「mojang_status」をロードしました")
 def ip_lookup(ip): # lookupコマンドで使用
 	response = requests.get(f"http://ip-api.com/json/{ip}?fields=status,continent,country,regionName,city,lat,lon,timezone,isp,org,reverse,mobile,proxy,hosting,query")
 	return response.json()
+print("[StartUp] 関数「ip_lookup」をロードしました")
 
 def Start_up_message(): # on_ready()関数で使用
 	version = ConfigLoad["version"]
@@ -95,11 +96,23 @@ def Start_up_message(): # on_ready()関数で使用
 	print(f"Bot version is {version}")
 print("[StartUp]関数「Start_up_message」をロードしました")
 
-def get_prefix(client, message): # commandsのBot関数で使用
+def get_prefix(bot, message): # commandsのBot関数で使用
 	with open("prefix.json", "r") as f:
 		prefixes = json.load(f)
-	return prefixes[str(message.guild.id)]
+	try:
+		return prefixes[str(message.guild.id)]
+	except:
+		return "."
 print("[StartUp]関数「get_prefix」をロードしました")
+
+def get_prefix_2(gid): # commandsのBot関数意外に使う場合
+	with open("prefix.json", "r") as f:
+		prefixes = json.load(f)
+	try:
+		return prefixes[str(gid)]
+	except:
+		return "."
+print("[StartUp]関数「get_prefix_2」をロードしました")
 
 def token_check(token): # tokenecコマンドで使用
 	api_url = "https://discord.com/api/v6/auth/login"
@@ -108,7 +121,7 @@ def token_check(token): # tokenecコマンドで使用
 	if response.status_code == 200:
 		return True
 	else:
-		return f"{response.status_code}エラー"
+		return False
 print("[StartUp]関数「token_check」をロードしました")
 
 def token_info(token): # tokencコマンドで使用
@@ -144,25 +157,22 @@ def token_info(token): # tokencコマンドで使用
 print("[StartUp]関数「token_info」をロードしました")
 
 def nitro_check(code): # nitrocコマンドで使用
-	response = requests.get(f"https://discordapp.com/api/v6/entitlements/gift-codes/{code}")
+	response = requests.get(f"https://discordapp.com/api/v9/entitlements/gift-codes/{code}")
 	if response.status_code == 200:
 		return True
 	else:
-		return f"{response.status_code}エラー"
+		return False
 print("[StartUp]関数「nitro_check」をロードしました")
 
 def invite_check(code): # invitecコマンドで使用
-	res = requests.get(f"https://discordapp.com/api/v6/invite/{code}")
+	res = requests.get(f"https://discordapp.com/api/v9/invite/{code}")
 	response = res.json()
 	return response
 print("[StartUp]関数「invite_check」をロードしました")
 
-def words_check(data, gid): # NGWordコマンドで使用
-	for json_gid in data:
-		if str(gid) == json_gid:
-			return True
-	return False
-print("[StartUp]関数「words_check」をロードしました")
+time_layout = {'s': 'seconds', 'm': 'minutes', 'h': 'hours', 'd': 'days', 'w': 'weeks'}
+def convert_seconds(time): # 時間計算
+    return int(datetime.timedelta(**{time_layout.get(m.group('unit').lower(), 'seconds'): int(m.group('val'))for m in re.finditer(r'(?P<val>\d+)(?P<unit>[smhdw]?)', time, flags=re.I)}).total_seconds())
 # Function
 
 # Config load
@@ -173,7 +183,7 @@ print("[StartUp]Jsonファイル「config.json」をロードしました")
 
 # Settings
 prefix = ConfigLoad["prefix"]
-owners = [38476, 39992]
+owners = []
 bot = commands.Bot(
 	command_prefix=(get_prefix),
 	help_command=None,
@@ -211,10 +221,15 @@ async def on_command_error(_error, error):
 		print("[Defined error]想定済みのエラー(MissingRequiredArgument)が発生しました。")
 		await _error.reply("コマンドの引数が足りていません。")
 		return
+	elif isinstance(error, MissingPermissions):
+		print("[Defined error]想定済みのエラー(MissingPermissions)が発生しました。")
+		await _error.reply("Bot自体の権限が足りません。")
+		return
 	else:
 		main_python_error = getattr(error, "original", error)
 		error_message = "".join(traceback.TracebackException.from_exception(main_python_error).format())
 		await _error.send(f"**__想定外のエラー__**\nこれは想定外のエラーです。\n開発者に報告してください。\n\nエラー内容:\n```{error_message}```")
+		return
 
 	raise error
 # Error処理
@@ -224,7 +239,7 @@ async def on_command_error(_error, error):
 async def on_ready():
 	if ConfigLoad["start-notify"] == "true":
 		Start_up_message()
-		await bot.change_presence(activity=discord.Game(name='ゲームのプレイ', type=1))
+		await bot.change_presence(activity=discord.Game(name='.help | AkkeyBot', type=1))
 		notify_channel_id = ConfigLoad["chid"]
 		notify_channel = await bot.fetch_channel(int(notify_channel_id))
 		version = ConfigLoad["version"]
@@ -232,13 +247,20 @@ async def on_ready():
 		await notify_channel.send(f"Bot version is {version}")
 	else:
 		Start_up_message()
-		await bot.change_presence(activity=discord.Game(name='ゲームのプレイ', type=1))
+		await bot.change_presence(activity=discord.Game(name='.help | AkkeyBot', type=1))
 
 @bot.event
 async def on_guild_join(guild):
 	print(f"サーバー「{guild.name}」へ参加しました")
 	if guild.system_channel:
-		await guild.system_channel.send(f'参加時のメッセージ')
+		try:
+			await guild.system_channel.send(f'AkkeyBotの導入誠にありがとうございます。\n「{get_prefix_2(guild.id)}help cmd 1」で全てのコマンドを表示することができます。\nhelpコマンドの「1」の所を変えるとページを変えることができます。')
+		except discord.errors.Forbidden:
+			pass
+		else:
+			pass
+	else:
+		pass
 	with open("mute.json", "r") as f:
 		mute_role_ids = json.load(f)
 	mute_role_ids[str(guild.id)] = "0"
@@ -249,11 +271,6 @@ async def on_guild_join(guild):
 	guilds_prefix[str(guild.id)] = "."
 	with open("prefix.json", "w") as f:
 		json.dump(guilds_prefix, f, indent=4)
-	with open("words.json", "r") as f:
-		words_load = json.load(f)
-	words_load[str(guild.id)] = []
-	with open("words.json", "w") as f:
-		json.dump(words_load, f, indent=4)
 
 @bot.event
 async def on_guild_remove(guild):
@@ -268,57 +285,50 @@ async def on_guild_remove(guild):
 	prefixes.pop(str(guild.id))
 	with open("prefix.json", "w") as f:
 		json.dump(prefixes, f, indent=4)
-	with open("words.json", "r") as f:
-		words_load = json.load(f)
-	words_load.pop(str(guild.id))
-	with open("words.json", "w") as f:
-		json.dump(words_load, f, indent=4)
 # Bot Events
 
 @bot.command()
-async def help(help, t="cmd", page="0"):
+async def help(help, t=None, page=None):
 	if t == "cmd":
-		if page == "0":
-			await help.send("コマンド「help cmd 1」でコマンド一覧を表示できます。\n(ページ: 0/4)")
+		if page == None:
+			await help.send(f"コマンド「{get_prefix_2(help.guild.id)}help cmd 1」でコマンド一覧を表示できます。\n(ページ: 0/5)")
 		elif page == "1":
-			HelpPage1 = discord.Embed(title="コマンド一覧 - 1")
+			HelpPage1 = discord.Embed(title="コマンド一覧 - 1/5")
 			HelpPage1.add_field(name="update", value="これまでアップデート履歴と変更ログを見ることができます。", inline=False)
 			HelpPage1.add_field(name="say [type(msg/ embed)] [message]", value="Botに言葉をしゃべらせることができます。", inline=False)
 			HelpPage1.add_field(name="roleper [@MentionRole]", value="メンションしたロールの権限を見ることができます。", inline=False)
 			HelpPage1.add_field(name="memberper [@Mention]", value="メンションしたユーザーの権限を見ることができます。", inline=False)
-			HelpPage1.add_field(name="getmcsv [Minecraftサーバーのアドレス] [Minecraftサーバーのポート]", value="指定したサーバーの参加人数やpingを取得します。", inline=False)
+			HelpPage1.add_field(name="getmcsv [type(normal / query)*] [Minecraftサーバーのアドレス*] [Minecraftサーバーのポート*]", value="指定したサーバーの参加人数やpingを取得します。", inline=False)
 			await help.send(embed=HelpPage1)
 		elif page == "2":
-			HelpPage2 = discord.Embed(title="コマンド一覧 - 2")
+			HelpPage2 = discord.Embed(title="コマンド一覧 - 2/5")
 			HelpPage2.add_field(name="getmojang", value="Mojangサーバーのステータスを表示します。", inline=False)
-			HelpPage2.add_field(name="serach [UserID]", value="IDのユーザーの情報を取得します。", inline=False)
+			HelpPage2.add_field(name="serach [@Mention / UserID*]", value="IDのユーザーの情報を取得します。", inline=False)
 			HelpPage2.add_field(name="banlist", value="サーバーからBanされているユーザーを一覧します。", inline=False)
-			HelpPage2.add_field(name="kick [@Mentioin] [Reason]", value="ユーザーのKickを実行します。", inline=False)
-			HelpPage2.add_field(name="tempban [UserID] [Time(単位: 秒)] [Reason]", value="一時的なBanです。", inline=False)
+			HelpPage2.add_field(name="kick [@Mentioin*] [Reason]", value="ユーザーのKickを実行します。", inline=False)
+			HelpPage2.add_field(name="tempban [@Mention / UserID*] [Time(s:秒 / m:分 / h:時間 / w:週間)*] [Reason]", value="一時的なBanです。", inline=False)
 			await help.send(embed=HelpPage2)
 		elif page == "3":
-			HelpPage3 = discord.Embed(title="コマンド一覧 - 3")
-			HelpPage3.add_field(name="ban [UserID] [Reason]", value="プレイヤーをBanします", inline=False)
-			HelpPage3.add_field(name="unban [UserID]", value="指定のユーザーをUnBanします。", inline=False)
-			HelpPage3.add_field(name="report [Content]", value="不具合等の報告ができます。")
-			HelpPage3.add_field(name="sapi [APIURL] [Headers(Json)]", value="簡単にAPIのテストを行うことができます。", inline=False)
-			HelpPage3.add_field(name="slowmode [delay(seconds / max: 6hours)]", value="簡単にそのチャンネルの低速モードを設定できます。", inline=False)
+			HelpPage3 = discord.Embed(title="コマンド一覧 - 3/5")
+			HelpPage3.add_field(name="ban [@Mention / UserID*] [Reason]", value="プレイヤーをBanします", inline=False)
+			HelpPage3.add_field(name="unban [UserID*]", value="指定のユーザーをUnBanします。", inline=False)
+			HelpPage3.add_field(name="report [Content*]", value="不具合等の報告ができます。")
+			HelpPage3.add_field(name="sapi [APIURL*] [Headers(Json)]", value="簡単にAPIのテストを行うことができます。", inline=False)
+			HelpPage3.add_field(name="slowmode [delay(seconds / max: 6hours)*]", value="簡単にそのチャンネルの低速モードを設定できます。", inline=False)
 			await help.send(embed=HelpPage3)
 		elif page == "4":
-			HelpPage4 = discord.Embed(title="コマンド一覧 - 4")
-			HelpPage4.add_field(name="lookup [IP]", value="IPの情報をAPIで検索します。")
-			HelpPage4.add_field(name="mute [type(set / mute)] [id]", value="ユーザーのミュートとアンミュートを行います")
-			HelpPage4.add_field(name="qi [@Mention]", value="特定のBotの招待リンクを発行します。")
-			HelpPage4.add_field(name="nitroc [nitro-code]", value="Nitroのリンクが有効か確認します。")
-			HelpPage4.add_field(name="invitec [invite-link-code]", value="招待リンクが機能しているか確認します。")
+			HelpPage4 = discord.Embed(title="コマンド一覧 - 4/5")
+			HelpPage4.add_field(name="lookup [IP*]", value="IPの情報をAPIで検索します。", inline=False)
+			HelpPage4.add_field(name="mute [type(set / mute)*] [id(user / role)*]", value="ユーザーのミュートとアンミュートを行います", inline=False)
+			HelpPage4.add_field(name="qi [@Mention*]", value="特定のBotの招待リンクを発行します。", inline=False)
+			HelpPage4.add_field(name="nitroc [nitro-code*]", value="Nitroのリンクが有効か確認します。", inline=False)
+			HelpPage4.add_field(name="invitec [invite-link-code*]", value="招待リンクが機能しているか確認します。", inline=False)
 			await help.send(embed=HelpPage4)
 		elif page == "5":
-			HelpPage5 = discord.Embed(title="コマンド一覧 - 5")
-			HelpPage5.add_field(name="tokenec [token]", value="Tokenが有効か確認します。")
-			HelpPage5.add_field(name="tokenc [token]", value="Tokenの情報を詳細に確認します。")
-			HelpPage5.add_field(name="ping [type(normal / float)]", value="Botのpingを測定します。")
-			HelpPage5.add_field(name="glist", value="Botの参加しているサーバー一覧です。")
-			HelpPage5.add_field(name="ngword [type(add / remove / words)] [words]", value="NGWordの設定です")
+			HelpPage5 = discord.Embed(title="コマンド一覧 - 5/5")
+			HelpPage5.add_field(name="tokenec [token*]", value="Tokenが有効か確認します。", inline=False)
+			HelpPage5.add_field(name="tokenc [token*]", value="Tokenの情報を詳細に確認します。", inline=False)
+			HelpPage5.add_field(name="ping [type(normal / float)]", value="Botのpingを測定します。", inline=False)
 		else:
 			await help.send("無効な引数です。")
 	else:
@@ -354,76 +364,19 @@ async def update(update):
 	UpdateInfo.add_field(name="Bot-PreRerese-Development-#23(Development)", value="- stopコマンドを修正\n- tokenecとtokencコマンドを追加\n- art(AntiRealToken)システムを追加\n- qiコマンドを追加", inline=False)
 	UpdateInfo.add_field(name="Bot-PreRerese-Development-#24(Development)", value="- nitrocコマンドを追加\n- invitecコマンドを追加", inline=False)
 	UpdateInfo.add_field(name="Bot-PreRerese-Development-#25(Development)", value="- redeemコマンドを追加\n- Plus機能を追加", inline=False)
-	UpdateInfo.add_field(name="Bot-PreRerese-Development-#26(Development | Latest)", value="- 複数の不具合を修正", inline=False)
+	UpdateInfo.add_field(name="Bot-PreRerese-Development-#26(Development)", value="- 複数の不具合を修正", inline=False)
 	UpdateInfo.add_field(name="Bot-Version-1.0.0", value="- 複数の不具合を修正\n- Botコマンドを追加\n- plus機能やそれに関することを完全削除\n- pingコマンド追加", inline=False)
-	UpdateInfo.add_field(name="Bot-Version-1.0.1(Latest)", value="- glist追加\n- runコマンドを追加\n- 一部のユーザーしか実行できないコードはhelpから削除\n- サーバーごとにNGWordを追加できるように\n- helpコマンドの表示変更", inline=False)
+	UpdateInfo.add_field(name="Bot-Version-1.0.1", value="- glist追加\n- runコマンドを追加\n- 一部のユーザーしか実行できないコードはhelpから削除\n- サーバーごとにNGWordを追加できるように\n- helpコマンドの表示変更", inline=False)
+	UpdateInfo.add_field(name="Bot-Version-1.0.2", value="- 不具合の修正")
+	UpdateInfo.add_field(name="Bot-Version-1.0.3", value="- Lookupコマンドで多くの情報を知れるように。")
+	UpdateInfo.add_field(name="Bot-Version-1.0.4-Build#1 ~ #20(Development)", value="- Lookupコマンド改善\n- gban削除")
+	UpdateInfo.add_field(name="Bot-Version-1.0.4(Latest)", value="- ngwordシステム削除\n- helpコマンド改善\n- その他複数コマンド改善\n- AntiTokenを削除")
 	await update.send(embed=UpdateInfo)
-
-@bot.command()
-async def ngword(ngword, t, word: str=None):
-	guild_id = ngword.guild.id
-	with open("words.json", "r", encoding="utf-8") as f:
-		words_load = json.load(f)
-	if t == "add":
-		if word == None:
-			await ngword.send("引数が足りません。")
-		response = words_check(data=words_load, gid=guild_id)
-		if response == True:
-			pass
-		else:
-			await ngword.send("想定外のエラーです。\nBotを参加させなおしても改善しない場合は開発者にお問い合わせください。")
-			return
-		for w in words_load[str(guild_id)]:
-			if w == word:
-				await ngword.send("既にその文字は登録されています。")
-				return
-			else:
-				pass
-		words_load[str(guild_id)].append(word)
-		with open("words.json", "w", encoding="utf-8") as f:
-			json.dump(words_load, f, indent=4)
-		await ngword.send("NGWordの登録が完了しました。")
-	elif t == "remove":
-		if word == None:
-			await ngword.send("引数が足りません。")
-		response = words_check(data=words_load, gid=guild_id)
-		if response == True:
-			pass
-		else:
-			await ngword.send("想定外のエラーです。\nBotを参加させなおしても改善しない場合は開発者にお問い合わせください。")
-			return
-		for w in words_load[str(guild_id)]:
-			if w == word:
-				words_load[str(guild_id)].remove(word)
-				with open("words.json", "w", encoding="utf-8") as f:
-					json.dump(words_load, f, indent=4)
-				await ngword.send("NGWordの削除が完了しました。")
-				return
-			else:
-				pass
-		await ngword.send("NGWordが存在しません。")
-	elif t == "words":
-		response = words_check(data=words_load, gid=guild_id)
-		if response == True:
-			pass
-		else:
-			await ngword.send("想定外のエラーです。\nBotを参加させなおしても改善しない場合は開発者にお問い合わせください。")
-			return
-		words = []
-		for w in words_load[str(guild_id)]:
-			words.append(w)
-		await ngword.send("- {0}".format("\n".join(words)))
-
-@bot.command()
-@commands.cooldown(1, 30, commands.BucketType.user)
-async def glist(glist):
-	guilds = bot.guilds
-	guild_list = ["• {0}".format(guild) for guild in guilds]
-	await glist.send("Guilds\n{0}".format("\n".join(guild_list)))
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
 async def ping(ping, t="normal"):
+	print("[Run]コマンド「ping」が実行されました")
 	if t == "normal": 
 		p = int(bot.latency)
 	elif t == "float":
@@ -442,14 +395,18 @@ async def sapi(sapi, url=None, type="get", headers=None):
 	if headers == None:
 		try:
 			response = json_api(url, type)
-			await sapi.send(f"{response}")
-		except:
+			await sapi.send(f"{response.json()}")
+		except JSONDecodeError:
+			await sapi.send("レスポンスがjson形式ではありませんでした。")
+		else:
 			await sapi.send("APIの取得ができませんでした。")
 	else:
 		try:
 			response = json_api(url, type, headers)
 			await sapi.send(f"{response.json()}")
-		except:
+		except JSONDecodeError:
+			await sapi.send("レスポンスがjson形式ではありませんでした。")
+		else:
 			await sapi.send("APIの取得ができませんでした。")
 
 @bot.command()
@@ -495,7 +452,6 @@ async def server(server):
 	await server.send(embed=ServerStatus_2)
 	await server.send(embed=ServerRoles)
 
-
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
 async def tokenec(tokenec, t=None):
@@ -506,7 +462,7 @@ async def tokenec(tokenec, t=None):
 	if response == True:
 		await tokenec.send("Tokenは有効です。")
 	else:
-		await tokenec.send(response)
+		await tokenec.send("Tokenは無効です。")
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
@@ -521,7 +477,7 @@ async def qi(qi, b):
 	await qi.send(f"リンクを発行しました。\nhttps://discord.com/api/oauth2/authorize?client_id={bot_user}&permissions=8&scope=bot")
 
 @bot.command()
-@commands.cooldown(1, 30, commands.BucketType.user)
+@commands.cooldown(1, 120, commands.BucketType.guild)
 async def tokenc(tokenc, t=None):
 	if t == None:
 		await tokenc.send("Tokenを入力してください。")
@@ -530,7 +486,7 @@ async def tokenc(tokenc, t=None):
 	await tokenc.send(response)
 
 @bot.command()
-@commands.cooldown(1, 30, commands.BucketType.user)
+@commands.cooldown(1, 120, commands.BucketType.guild)
 async def nitroc(nitroc, nitro=None):
 	print("[Run]コマンド「nitroc」が実行されました")
 	if nitro == None:
@@ -540,7 +496,7 @@ async def nitroc(nitroc, nitro=None):
 	if response == True:
 		await nitroc.send("Nitroは有効です。")
 	else:
-		await nitroc.send(response)
+		await nitroc.send("Nitroは無効です。")
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
@@ -598,34 +554,6 @@ async def say(say, type="msg", *, content):
 	else:
 		await say.send("管理者以外は実行することができません。")
 
-@bot.command(pass_context=True)
-@commands.is_owner()
-async def gban(gban, id: int):
-	print("[Run]コマンド「gban」が実行されました")
-	user = await bot.fetch_user(int(id))
-	response = get_all_guilds()
-	for guildID in response:
-		guild = bot.get_guild(int(guildID))
-		await guild.ban(user)
-	GBanNotify = discord.Embed(title="GBan", description=f"ユーザーのグローバルBanを実行しました。", color=0x008000)
-	GBanNotify.add_field(name="実行者の情報", value=f"名前: {gban.author}\nID: {gban.author.id}")
-	GBanNotify.add_field(name="Ban者の情報", value=f"名前: {user}\nID: {user.id}", inline=False)
-	await gban.send(embed=GBanNotify)
-
-@bot.command(pass_context=True)
-@commands.is_owner()
-async def gunban(gunban, id: int):
-	print("[Run]コマンド「gunban」が実行されました")
-	user = await bot.fetch_user(int(id))
-	response = get_all_guilds()
-	for guildID in response:
-		guild = bot.get_guild(int(guildID))
-		await guild.unban(user)
-	GUnBanNotify = discord.Embed(title="GUnBan", description=f"ユーザーのGUnBanを実行しました。", color=0x008000)
-	GUnBanNotify.add_field(name="実行者の情報", value=f"名前: {gunban.author}\nID: {gunban.author.id}")
-	GUnBanNotify.add_field(name="UnBan者の情報", value=f"名前: {user}\nID: {user.id}", inline=False)
-	await gunban.send(embed=GUnBanNotify)
-
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
 async def invitec(invitec, icode):
@@ -667,17 +595,17 @@ async def invitec(invitec, icode):
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
-async def mute(mute, settype, id:int, reason):
+async def mute(mute, settype, id):
 	print("[Run]コマンド「mute」が実行されました")
 	if mute.author.guild_permissions.administrator:
 		guild = bot.get_guild(mute.guild.id)
-		if settype == "role":
+		if settype == "set":
 			with open("mute.json", "r") as f:
 				mute_role_ids = json.load(f)
 			mute_role_ids[str(guild.id)] = str(id)
 			with open("mute.json", "w") as f:
 				json.dump(mute_role_ids, f, indent=4)
-			await mute.send("Success")
+			await mute.send(f"ロールを{id}設定しました。")
 		elif settype == "mute":
 			with open("mute.json", "r") as f:
 				mute_role_ids = json.load(f)
@@ -689,7 +617,7 @@ async def mute(mute, settype, id:int, reason):
 			except:
 				ExceptionError = discord.Embed(title="エラー", description="ミュートが正常にできませんでした。")
 				await getmcsv.send(embed=ExceptionError)
-			await mute.send(f"Success(Reason: {reason})")
+			await mute.send(f"{user}をミュートしました。")
 		elif settype == "unmute":
 			with open("mute.json", "r") as f:
 				mute_role_ids = json.load(f)
@@ -701,9 +629,9 @@ async def mute(mute, settype, id:int, reason):
 			except:
 				ExceptionError = discord.Embed(title="エラー", description="ミュート解除が正常にできませんでした。")
 				await mute.send(embed=ExceptionError)
-			await mute.send(f"Success")
+			await mute.send(f"{user}さんのロールを解除しました。")
 	else:
-		await mute.send("権限が足りません。\nミュートを実行るには管理者権限保有者でなければ行けません。")
+		await mute.send("権限が足りません。\nミュートを実行するには管理者権限保有者でなければ行けません。")
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
@@ -1076,13 +1004,13 @@ async def serach(serach, u=None):
 	try:
 		def status_jp_gen(s):
 			if "online" in s:
-				status_jp = "オンライン"
+				status_jp = ":green_circle:"
 			elif "idle" in s:
-				status_jp = "離席中"
+				status_jp = ":yellow_circle:"
 			elif "dnd" in s:
-				status_jp = "離席中"
+				status_jp = ":red_circle:"
 			elif "offline" in s:
-				status_jp = "オフライン"
+				status_jp = ":black_circle:"
 			return status_jp
 		guild = bot.get_guild(serach.guild.id)
 		user = guild.get_member(int(e))
@@ -1106,9 +1034,142 @@ async def serach(serach, u=None):
 		phone_status_jp = status_jp_gen(s=status_phone)
 		desktop_status_jp = status_jp_gen(s=status_app)
 		web_status_jp = status_jp_gen(s=status_web)
+		if user.guild_permissions.administrator:
+			administrator=':green_circle:'
+		else:
+			administrator='::red_circle:'
+		if user.guild_permissions.view_audit_log:
+			view_audit_log=':green_circle:'
+		else:
+			view_audit_log=':red_circle:'
+		if user.guild_permissions.view_guild_insights:
+			view_guild_insights=':green_circle:'
+		else:
+			view_guild_insights=':red_circle:'
+		if user.guild_permissions.manage_guild:
+			manage_guild=':green_circle:'
+		else:
+			manage_guild=':red_circle:'
+		if user.guild_permissions.manage_roles:
+			manage_roles=':green_circle:'
+		else:
+			manage_roles=':red_circle:'
+		if user.guild_permissions.manage_channels:
+			manage_channels=':green_circle:'
+		else:
+			manage_channels=':red_circle:'
+		if user.guild_permissions.kick_members:
+			kick_members=":green_circle:"
+		else:
+			kick_members=':red_circle:'
+		if user.guild_permissions.ban_members:
+			ban_members=':green_circle:'
+		else:
+			ban_members=':red_circle:'
+		if user.guild_permissions.create_instant_invite:
+			create_instant_invite=':green_circle:'
+		else:
+			create_instant_invite=':red_circle:'
+		if user.guild_permissions.change_nickname:
+			change_nickname=':green_circle:'
+		else:
+			change_nickname=':red_circle:'
+		if user.guild_permissions.manage_nicknames:
+			manage_nicknames=':green_circle:'
+		else:
+			manage_nicknames=':red_circle:'
+		if user.guild_permissions.manage_emojis:
+			manage_emojis=':green_circle:'
+		else:
+			manage_emojis=':red_circle:'
+		if user.guild_permissions.manage_webhooks:
+			manage_webhooks=':green_circle:'
+		else:
+			manage_webhooks=':red_circle:'
+		if user.guild_permissions.view_channel:
+			view_channel=':green_circle:'
+		else:
+			view_channel=':red_circle:'
+		if user.guild_permissions.send_messages:
+			send_messages=':green_circle:'
+		else:
+			send_messages=':red_circle:'
+		if user.guild_permissions.send_tts_messages:
+			send_tts_messages=':green_circle:'
+		else:
+			send_tts_messages=':red_circle:'
+		if user.guild_permissions.manage_messages:
+			manage_messages=':green_circle:'
+		else:
+			manage_messages=':red_circle:'
+		if user.guild_permissions.embed_links:
+			embed_links=':green_circle:'
+		else:
+			embed_links=':red_circle:'
+		if user.guild_permissions.attach_files:
+			attach_files=':green_circle:'
+		else:
+			attach_files=':red_circle:'
+		if user.guild_permissions.read_message_history:
+			read_message_history=':green_circle:'
+		else:
+			read_message_history=':red_circle:'
+		if user.guild_permissions.mention_everyone:
+			mention_everyone=':green_circle:'
+		else:
+			mention_everyone=':red_circle:'
+		if user.guild_permissions.use_external_emojis:
+			use_external_emojis=':green_circle:'
+		else:
+			use_external_emojis=':red_circle:'
+		if user.guild_permissions.add_reactions:
+			add_reactions=':green_circle:'
+		else:
+			add_reactions=':red_circle:'
+		if user.guild_permissions.use_slash_commands:
+			use_slash_commands=':green_circle:'
+		else:
+			use_slash_commands=':red_circle:'
+		if user.guild_permissions.connect:
+			connect=':green_circle:'
+		else:
+			connect=':red_circle:'
+		if user.guild_permissions.speak:
+			speak=':green_circle:'
+		else:
+			speak=':red_circle:'
+		if user.guild_permissions.mute_members:
+			mute_members = ':green_circle:'
+		else:
+			mute_members = ':red_circle:'
+		if user.guild_permissions.deafen_members:
+			deafen_members = ':green_circle:'
+		else:
+			deafen_members = ':red_circle:'
+		if user.guild_permissions.move_members:
+			move_members = ':green_circle:'
+		else:
+			move_members = ':red_circle:'
+		if user.guild_permissions.use_voice_activation:
+			use_voice_activation = ':green_circle:'
+		else:
+			use_voice_activation = ':red_circle:'
+		if user.guild_permissions.priority_speaker:
+			priority_speaker = ':green_circle:'
+		else:
+			priority_speaker = ':red_circle:'
+		roles = []
+		for role in user.roles:
+			if role.name == "@everyone":
+				continue
+			roles.append(role.name)
 		uinfo = discord.Embed(title=f"{username}", description=f"ユーザー名: {username}\nID: {id}\nニックネーム: {nickname}\nアカウント作成日: {create_time}\nサーバー参加日: {join_time}\nステータス: {status_jp}\nWebステータス: {web_status_jp}\nデスクトップステータス: {desktop_status_jp}\nスマホステータス: {phone_status_jp}\nBotステータス: {bot_check_jp}")
+		uper = discord.Embed(title=f'権限', description=f'管理者権限: {administrator}\n\n監視ログの表示: {view_audit_log}\n\nサーバーインサイトの表示: {view_guild_insights}\n\nサーバー管理: {manage_guild}\n\nロール管理: {manage_roles}\n\nチャンネルの管理: {manage_channels}\n\nメンバーのKick: {kick_members}\n\nメンバーのBan: {ban_members}\n\nインスタント招待の作成: {create_instant_invite}\n\nニックネームの変更: {change_nickname}\n\nニックネームの管理: {manage_nicknames}\n\n絵文字の管理: {manage_emojis}\n\nWebHook管理: {manage_webhooks}\n\nチャンネルを表示: {view_channel}\n\nメッセージを送信: {send_messages}\n\nTTSメッセージの送信: {send_tts_messages}\n\nメッセージの管理: {manage_messages}\n\n埋め込みリンク: {embed_links}\n\nファイルの添付: {attach_files}\n\nメッセージ履歴を標示: {read_message_history}\n\neveryoneメンション: {mention_everyone}\n\n外部の絵文字を使用: {use_external_emojis}\n\nリアクションを追加: {add_reactions}\n\nスラッシュコマンドの使用: {use_slash_commands}\n\nボイスチャンネルへの接続: {connect}\n\nボイスチャンネルでの発言: {speak}\n\nメンバーをミュート: {mute_members}\n\nメンバーをスピーカーミュート: {deafen_members}\n\nメンバーを移動: {move_members}\n\nボイスアクティビティ: {use_voice_activation}\n\n優先スピーカー: {priority_speaker}')
+		uroles = discord.Embed(title="ロール", description="- {0}".format("\n".join(roles)))
 		uinfo.set_thumbnail(url=f"{user.avatar_url}")
 		await serach.send(embed=uinfo)
+		await serach.send(embed=uper)
+		await serach.send(embed=uroles)
 		return
 	except discord.errors.NotFound:
 		try:
@@ -1160,7 +1221,8 @@ async def tempban(tempban, request_ban_user, time, reason="Banned"):
 		BanNotify.add_field(name="実行者の情報", value=f"名前: {tempban.author}\nID: {tempban.author.id}", inline=False)
 		BanNotify.add_field(name="TempBan者の情報", value=f"名前: {user}\nID: {user.id}", inline=False)
 		await tempban.send(embed=BanNotify)
-		await asyncio.sleep(int(time))
+		response = convert_seconds(time)
+		await asyncio.sleep(int(response))
 		await tempban.guild.unban(user)
 	else:
 		PermissionError = discord.Embed(title="権限エラー", description="権限が足りません。\n少なくともBan権限が必要です。", color=0xFF0000)
@@ -1226,7 +1288,7 @@ async def slowmode(slowmode, delay: int):
 async def report(report, *, content):
 	print("[Run]コマンド「report」が実行されました")
 	await report.send("レポートを送信します。")
-	get_user = await bot.fetch_user(38294)
+	get_user = await bot.fetch_user(846242026679697438)
 	await get_user.send(f"レポートが届きました。\n送信元: {report.author}\n内容: {content}")
 	await report.send("レポートが送信されました。")
 
@@ -1237,7 +1299,10 @@ async def setpre(setpre, prefix="."):
 	if setpre.author.guild_permissions.administrator:
 		with open('prefix.json', 'r') as f:
 			prefixes = json.load(f)
-		prefixes[str(setpre.guild.id)] = str(prefix)
+		try:
+			prefixes[str(setpre.guild.id)] = str(prefix)
+		except KeyError:
+			await setpre.send("エラーが発生しました。\nBotの再参加が必要な可能性があります。")
 		with open('prefix.json', 'w') as f:
 			json.dump(prefixes, f, indent=4)
 		await setpre.send(f'サーバーのPrefixを「 {prefix} 」へ設定変更しました')
@@ -1256,4 +1321,4 @@ try:
 except:
 	exit()
 
-# Copyright 2021 - 2021 Akkey57492
+# Copyright © 2021 Akkey57492
