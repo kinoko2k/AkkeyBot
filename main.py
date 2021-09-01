@@ -1288,7 +1288,7 @@ async def slowmode(slowmode, delay: int):
 async def report(report, *, content):
 	print("[Run]コマンド「report」が実行されました")
 	await report.send("レポートを送信します。")
-	get_user = await bot.fetch_user(846242026679697438)
+	get_user = await bot.fetch_user()
 	await get_user.send(f"レポートが届きました。\n送信元: {report.author}\n内容: {content}")
 	await report.send("レポートが送信されました。")
 
