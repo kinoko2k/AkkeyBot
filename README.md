@@ -1,5 +1,5 @@
 # AkkeyBot
-Akkey57492が開発するPythonどJavaScriptで書かれたBotです。
+Akkey57492が開発するPythonで書かれたBotです。
 
 # コードの特徴
 - コメントが最低限あり、わかりやすく編集可能
@@ -11,7 +11,6 @@ Akkey57492が開発するPythonどJavaScriptで書かれたBotです。
 - サーバー専用のPrefixを設定可能
 - サーバーごとにMuteロールを設定可能
 - メンションとIDでBan等が可能
-- Gban機能を搭載
 - Welcomeメッセージ搭載
 
 # ライセンス
