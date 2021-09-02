@@ -4,6 +4,7 @@ nest_asyncio
 datetime
 traceback2
 requests
-discord
+nextcord
+pyyaml
 asyncio
 json
