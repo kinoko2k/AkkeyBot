@@ -1,0 +1,5 @@
+token: "" # BotへログインするためのToken
+start-notify: "" # Botが起動したときに特定のチャンネルで通知するか
+chid: "" # 起動通知を送信するチャンネル
+version: "1.0.6" # Botのバージョン
+prefix: "." # BotのPrefix
