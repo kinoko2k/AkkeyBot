@@ -13,22 +13,24 @@ import traceback2 as traceback
 print("[StartUp]ライブラリ「traceback2」をインポートしました")
 import requests
 print("[StartUp]ライブラリ「requests」をインポートしました")
-import discord
-print("[StartUp]ライブラリ「discord」をインポートしました")
+import nextcord
+print("[StartUp]ライブラリ「nextcord」をインポートしました")
 import asyncio
 print("[StartUp]ライブラリ「asyncio」をインポートしました")
 import json
 print("[StartUp]ライブラリ「json」をインポートしました")
-from discord.ext import commands
-print("[StartUp]ライブラリ「discord」のパッケージ「commands」をインポートしました")
-from discord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument, MissingPermissions
-print("[StartUp]ライブラリ「discord」のパッケージ「CommandNotFound」をインポートしました")
-print("[StartUp]ライブラリ「discord」のパッケージ「CommandOnCooldown」をインポートしました")
-print("[StartUp]ライブラリ「discord」のパッケージ「NotOwner」をインポートしました")
-print("[StartUp]ライブラリ「discord」のパッケージ「MemberNotFound」をインポートしました")
-print("[StartUp]ライブラリ「discord」のパッケージ「RoleNotFound」をインポートしました")
-print("[StartUp]ライブラリ「discord」のパッケージ「MissingRequiredArgument」をインポートしました")
-print("[StartUP]ライブラリ「discord」のパッケージ「MissingPermissions」をインポートしました")
+import yaml
+print("[StartUp]ライブラリ「pyyaml」をインポートしました")
+from nextcord.ext import commands
+print("[StartUp]ライブラリ「nextcord」のパッケージ「commands」をインポートしました")
+from nextcord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument, MissingPermissions
+print("[StartUp]ライブラリ「nextcord」のパッケージ「CommandNotFound」をインポートしました")
+print("[StartUp]ライブラリ「nextcord」のパッケージ「CommandOnCooldown」をインポートしました")
+print("[StartUp]ライブラリ「nextcord」のパッケージ「NotOwner」をインポートしました")
+print("[StartUp]ライブラリ「nextcord」のパッケージ「MemberNotFound」をインポートしました")
+print("[StartUp]ライブラリ「nextcord」のパッケージ「RoleNotFound」をインポートしました")
+print("[StartUp]ライブラリ「nextcord」のパッケージ「MissingRequiredArgument」をインポートしました")
+print("[StartUP]ライブラリ「nextcord」のパッケージ「MissingPermissions」をインポートしました")
 # Module import
 
 # RuntimeError防止
@@ -176,8 +178,8 @@ def convert_seconds(time): # 時間計算
 # Function
 
 # Config load
-ConfigOpen = open("config.json", "r", encoding="utf-8")
-ConfigLoad = json.load(ConfigOpen) 
+ConfigOpen = open("config.yml", "r", encoding="utf-8")
+ConfigLoad = yaml.load(ConfigOpen) 
 print("[StartUp]Jsonファイル「config.json」をロードしました")
 # Config load
 
@@ -370,7 +372,9 @@ async def update(update):
 	UpdateInfo.add_field(name="Bot-Version-1.0.2", value="- 不具合の修正")
 	UpdateInfo.add_field(name="Bot-Version-1.0.3", value="- Lookupコマンドで多くの情報を知れるように。")
 	UpdateInfo.add_field(name="Bot-Version-1.0.4-Build#1 ~ #20(Development)", value="- Lookupコマンド改善\n- gban削除")
-	UpdateInfo.add_field(name="Bot-Version-1.0.4(Latest)", value="- ngwordシステム削除\n- helpコマンド改善\n- その他複数コマンド改善\n- AntiTokenを削除")
+	UpdateInfo.add_field(name="Bot-Version-1.0.4", value="- ngwordシステム削除\n- helpコマンド改善\n- その他複数コマンド改善\n- AntiTokenを削除")
+	UpdateInfo.add_field(name="Bot-Version-1.0.5", value="- JavaScriptを廃止")
+	UpdateInfo.add_field(name="Bot-Version-1.0.6(Latest)", value="- 内部システムを改善\n-discord.pyからnextcordへ")
 	await update.send(embed=UpdateInfo)
 
 @bot.command()
