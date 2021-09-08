@@ -13,14 +13,14 @@ import traceback2 as traceback
 print("[StartUp]ライブラリ「traceback2」をインポートしました")
 import requests
 print("[StartUp]ライブラリ「requests」をインポートしました")
-import nextcord
-print("[StartUp]ライブラリ「nextcord」をインポートしました")
+import discord
+print("[StartUp]ライブラリ「discord」をインポートしました")
 import asyncio
 print("[StartUp]ライブラリ「asyncio」をインポートしました")
 import json
 print("[StartUp]ライブラリ「json」をインポートしました")
 import yaml
-print("[StartUp]ライブラリ「pyyaml」をインポートしました")
+print("[StartUp]ライブラリ「yaml」をインポートしました")
 from nextcord.ext import commands
 print("[StartUp]ライブラリ「nextcord」のパッケージ「commands」をインポートしました")
 from nextcord.ext.commands import CommandNotFound, CommandOnCooldown, NotOwner, MemberNotFound, RoleNotFound, MissingRequiredArgument, MissingPermissions
@@ -45,27 +45,31 @@ def get_mute_role(gid): # mute関連に使用
 	return mute_role_ids[str(gid)]
 print("[StartUp]関数「get_mute_role」をロードしました")
 
-def json_api(url=None, type=None, headers=None): # sapiコマンドに使用
-	global response
-	if type == None:
+def json_api(url, t, headers): # sapiコマンドに使用
+	if t == None:
 		error_json = {"error": "discord_type_arg_error"}
 		return error_json
 	if url == None:
 		error_json = {"error": "discord_url_arg_error"}
 		return error_json
 	api_url = url
-	if type == "get":
+	if t == "get":
+		print("get")
 		if headers == None:
 			response = requests.get(api_url)
+			return response
 		else:
 			response = requests.get(api_url, headers=headers)
-	elif type == "post":
+		return response
+	elif t == "post":
+		print("post")
 		if headers == None:
 			response = requests.post(api_url)
+			return response
 		else:
 			response = requests.post(api_url, headers=headers)
-	print(response.json())
-	return response.json()
+		return response
+	print("test")
 print("[StartUp]関数「json_api」をロードしました")
 
 def mc_status(t, address, port): # minecraft関連のコマンドに使用
@@ -293,9 +297,9 @@ async def on_guild_remove(guild):
 async def help(help, t=None, page=None):
 	if t == "cmd":
 		if page == None:
-			await help.send(f"コマンド「{get_prefix_2(help.guild.id)}help cmd 1」でコマンド一覧を表示できます。\n(ページ: 0/5)")
+			await help.send(f"コマンド「help cmd 1」でコマンド一覧を表示できます。\n(ページ: 0/4)")
 		elif page == "1":
-			HelpPage1 = discord.Embed(title="コマンド一覧 - 1/5")
+			HelpPage1 = discord.Embed(title="コマンド一覧 - 1")
 			HelpPage1.add_field(name="update", value="これまでアップデート履歴と変更ログを見ることができます。", inline=False)
 			HelpPage1.add_field(name="say [type(msg/ embed)] [message]", value="Botに言葉をしゃべらせることができます。", inline=False)
 			HelpPage1.add_field(name="roleper [@MentionRole]", value="メンションしたロールの権限を見ることができます。", inline=False)
@@ -303,7 +307,7 @@ async def help(help, t=None, page=None):
 			HelpPage1.add_field(name="getmcsv [type(normal / query)*] [Minecraftサーバーのアドレス*] [Minecraftサーバーのポート*]", value="指定したサーバーの参加人数やpingを取得します。", inline=False)
 			await help.send(embed=HelpPage1)
 		elif page == "2":
-			HelpPage2 = discord.Embed(title="コマンド一覧 - 2/5")
+			HelpPage2 = discord.Embed(title="コマンド一覧 - 2")
 			HelpPage2.add_field(name="getmojang", value="Mojangサーバーのステータスを表示します。", inline=False)
 			HelpPage2.add_field(name="serach [@Mention / UserID*]", value="IDのユーザーの情報を取得します。", inline=False)
 			HelpPage2.add_field(name="banlist", value="サーバーからBanされているユーザーを一覧します。", inline=False)
@@ -311,7 +315,7 @@ async def help(help, t=None, page=None):
 			HelpPage2.add_field(name="tempban [@Mention / UserID*] [Time(s:秒 / m:分 / h:時間 / w:週間)*] [Reason]", value="一時的なBanです。", inline=False)
 			await help.send(embed=HelpPage2)
 		elif page == "3":
-			HelpPage3 = discord.Embed(title="コマンド一覧 - 3/5")
+			HelpPage3 = discord.Embed(title="コマンド一覧 - 3")
 			HelpPage3.add_field(name="ban [@Mention / UserID*] [Reason]", value="プレイヤーをBanします", inline=False)
 			HelpPage3.add_field(name="unban [UserID*]", value="指定のユーザーをUnBanします。", inline=False)
 			HelpPage3.add_field(name="report [Content*]", value="不具合等の報告ができます。")
@@ -319,7 +323,7 @@ async def help(help, t=None, page=None):
 			HelpPage3.add_field(name="slowmode [delay(seconds / max: 6hours)*]", value="簡単にそのチャンネルの低速モードを設定できます。", inline=False)
 			await help.send(embed=HelpPage3)
 		elif page == "4":
-			HelpPage4 = discord.Embed(title="コマンド一覧 - 4/5")
+			HelpPage4 = discord.Embed(title="コマンド一覧 - 4")
 			HelpPage4.add_field(name="lookup [IP*]", value="IPの情報をAPIで検索します。", inline=False)
 			HelpPage4.add_field(name="mute [type(set / mute)*] [id(user / role)*]", value="ユーザーのミュートとアンミュートを行います", inline=False)
 			HelpPage4.add_field(name="qi [@Mention*]", value="特定のBotの招待リンクを発行します。", inline=False)
@@ -327,7 +331,7 @@ async def help(help, t=None, page=None):
 			HelpPage4.add_field(name="invitec [invite-link-code*]", value="招待リンクが機能しているか確認します。", inline=False)
 			await help.send(embed=HelpPage4)
 		elif page == "5":
-			HelpPage5 = discord.Embed(title="コマンド一覧 - 5/5")
+			HelpPage5 = discord.Embed(title="コマンド一覧 - 5")
 			HelpPage5.add_field(name="tokenec [token*]", value="Tokenが有効か確認します。", inline=False)
 			HelpPage5.add_field(name="tokenc [token*]", value="Tokenの情報を詳細に確認します。", inline=False)
 			HelpPage5.add_field(name="ping [type(normal / float)]", value="Botのpingを測定します。", inline=False)
@@ -371,10 +375,10 @@ async def update(update):
 	UpdateInfo.add_field(name="Bot-Version-1.0.1", value="- glist追加\n- runコマンドを追加\n- 一部のユーザーしか実行できないコードはhelpから削除\n- サーバーごとにNGWordを追加できるように\n- helpコマンドの表示変更", inline=False)
 	UpdateInfo.add_field(name="Bot-Version-1.0.2", value="- 不具合の修正")
 	UpdateInfo.add_field(name="Bot-Version-1.0.3", value="- Lookupコマンドで多くの情報を知れるように。")
-	UpdateInfo.add_field(name="Bot-Version-1.0.4-Build#1 ~ #20(Development)", value="- Lookupコマンド改善\n- gban削除")
-	UpdateInfo.add_field(name="Bot-Version-1.0.4", value="- ngwordシステム削除\n- helpコマンド改善\n- その他複数コマンド改善\n- AntiTokenを削除")
-	UpdateInfo.add_field(name="Bot-Version-1.0.5", value="- JavaScriptを廃止")
-	UpdateInfo.add_field(name="Bot-Version-1.0.6(Latest)", value="- 内部システムを改善\n-discord.pyからnextcordへ")
+	UpdateInfo.add_field(name="Bot-Version-1.0.4", value="- ngwordシステム削除\n- helpコマンド改善\n- その他複数コマンド改善\n- gban削除")
+	UpdateInfo.add_field(name="Bot-Version-1.0.5", value="- JS廃止")
+	UpdateInfo.add_field(name="Bot-Version-1.0.6", value="- 内部的な変更")
+	UpdateInfo.add_field(name="Bot-Version-1.0.7(Latest)", value="- カテゴリおよびロールの複製コマンド追加\n- sapiコマンドの改良")
 	await update.send(embed=UpdateInfo)
 
 @bot.command()
@@ -390,28 +394,57 @@ async def ping(ping, t="normal"):
 	await ping.send(f"Ping: {p}ms")
 
 @bot.command()
+@commands.cooldown(1, 60, commands.BucketType.user)
+async def dupe(dupe, t, id, name):
+	print("[Run]コマンド「dupe」が実行されました")
+	if t == "Category":
+		guild = bot.get_guild(int(dupe.guild.id))
+		for category in guild.categories:
+			if category.id == int(id):
+				await guild.create_category(name=name, overwrites=category.overwrites)
+				await dupe.send("カテゴリを複製しました")
+				return
+		await dupe.send("該当のカテゴリが見つかりませんでした。")
+	elif t == "Role":
+		guild = bot.get_guild(int(dupe.guild.id))
+		try:
+			role = guild.get_role(int(id))
+		except RoleNotFound:
+			await dupe.send("該当のロールが見つかりませんでした")
+			return
+		try:
+			set_role_perms = role.permissions.value
+		except AttributeError:
+			await dupe.send("エラーが発生しました。\nこのエラーの原因は複数あります。\n可能性: ロールが見つからなかった / IDが無効")
+		try:
+			await guild.create_role(name=name, permissions=discord.Permissions(permissions=int(set_role_perms)), color=int(role.color))
+		except MissingPermissions:
+			await dupe.send("権限が足りません")
+			return
+		await dupe.send("ロールを複製しました")
+	else:
+		await dupe.send("タイプが無効です。")
+
+@bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
-async def sapi(sapi, url=None, type="get", headers=None):
+async def sapi(sapi, url=None, t="get", headers=None):
 	print("[Run]コマンド「sapi」が実行されました")
-	if url == None:
-		await sapi.send("APIのURLを指定してください。")
-		return
 	if headers == None:
 		try:
-			response = json_api(url, type)
-			await sapi.send(f"{response.json()}")
+			response = json_api(url=url, t=t, headers=headers)
+			await sapi.send(f"```json\n{response.json()}\n```")
 		except JSONDecodeError:
 			await sapi.send("レスポンスがjson形式ではありませんでした。")
-		else:
-			await sapi.send("APIの取得ができませんでした。")
+		except AttributeError:
+			await sapi.send("```json\n{ }\n```")
 	else:
 		try:
-			response = json_api(url, type, headers)
-			await sapi.send(f"{response.json()}")
+			response = json_api(url=url, t=t, headers=headers)
+			await sapi.send(f"```json\n{response.json()}\n```")
 		except JSONDecodeError:
 			await sapi.send("レスポンスがjson形式ではありませんでした。")
-		else:
-			await sapi.send("APIの取得ができませんでした。")
+		except AttributeError:
+			await sapi.send("```json\n{ }\n```")
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
