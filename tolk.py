@@ -1,12 +1,12 @@
-import discord
-print("[StartUp]モジュール「discord」をインポートしました")
-import json
-print("[StartUP]モジュール「json」をインポートしました")
+import nextcord
+print("[StartUp]モジュール「nextcord」をインポートしました")
+import yaml
+print("[StartUP]モジュール「yaml」をインポートしました")
 
-client = discord.Client()
-with open("config.json", "r") as file:
-    config = json.load(file)
-print("[StartUP]config.jsonをロードしました")
+client = nextcord.Client()
+with open("config.yml", "r") as file:
+    config = yaml.load(file)
+print("[StartUP]config.ymlをロードしました")
 
 @client.event
 async def on_ready():
