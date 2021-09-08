@@ -378,7 +378,8 @@ async def update(update):
 	UpdateInfo.add_field(name="Bot-Version-1.0.4", value="- ngwordシステム削除\n- helpコマンド改善\n- その他複数コマンド改善\n- gban削除")
 	UpdateInfo.add_field(name="Bot-Version-1.0.5", value="- JS廃止")
 	UpdateInfo.add_field(name="Bot-Version-1.0.6", value="- 内部的な変更")
-	UpdateInfo.add_field(name="Bot-Version-1.0.7(Latest)", value="- カテゴリおよびロールの複製コマンド追加\n- sapiコマンドの改良")
+	UpdateInfo.add_field(name="Bot-Version-1.0.7", value="- カテゴリおよびロールの複製コマンド追加\n- sapiコマンドの改良")
+	UpdateInfo.add_field(name="Bot-Version-1.0.8(Latest)", value="- 自動応答の安定性向上")
 	await update.send(embed=UpdateInfo)
 
 @bot.command()
